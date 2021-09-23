@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const { graphqlHTTP } = require('express-graphql');
 const graphqlSchema = require('./graphQL/schema');
 const graphqlResolver = require('./graphQL/resolvers');
+const isAuth = require('./middleware/isAuth')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -39,10 +40,14 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200)
+    }
     next();
 });
 
+
+app.use(isAuth)
 
 //GraphQL
 app.use('/graphql', graphqlHTTP({
